@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
 const app = express()
 const port = process.env.PORT || 5000;
 
@@ -16,12 +17,25 @@ async function run() {
     try {
         await client.connect();
         const productsCollection = client.db("refmanudb").collection("products");
+        const usersCollection = client.db("refmanudb").collection("users");
 
         app.get('/product', async(req, res)=>{
             const query = {};
             const cursor = productsCollection.find(query);
             const products = await cursor.toArray();
             res.send(products);
+        });
+        app.put('/user/:email', async (req, res)=>{
+            const email = req.params.email;
+            const user = req.body;
+            const filter = {email: email};
+            const options = {upsert: true};
+            const updateDoc = {
+                $set: user,
+            };
+            const result = await usersCollection.updateOne(filter, updateDoc, options);
+            const token =jwt.sign({email: email}, process.env.TOKEN_SECRET, {expiresIn: '3h'});
+            res.send({result, token});
         })
         
     } finally {
