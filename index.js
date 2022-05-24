@@ -1,6 +1,6 @@
 const express = require('express')
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const app = express()
@@ -18,6 +18,7 @@ async function run() {
         await client.connect();
         const productsCollection = client.db("refmanudb").collection("products");
         const usersCollection = client.db("refmanudb").collection("users");
+        const ordersCollection = client.db("refmanudb").collection("orders");
 
         app.get('/product', async(req, res)=>{
             const query = {};
@@ -25,6 +26,14 @@ async function run() {
             const products = await cursor.toArray();
             res.send(products);
         });
+
+        app.get('/product/:id', async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: ObjectId(id) }
+            const result = await productsCollection.findOne(filter)
+            res.send(result)
+        })
+
         app.put('/user/:email', async (req, res)=>{
             const email = req.params.email;
             const user = req.body;
@@ -36,6 +45,19 @@ async function run() {
             const result = await usersCollection.updateOne(filter, updateDoc, options);
             const token =jwt.sign({email: email}, process.env.TOKEN_SECRET, {expiresIn: '3h'});
             res.send({result, token});
+        });
+        app.put('/order/:id', async (req, res) => {
+            const id = req.params.id;
+            const updateInfo = req.body;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: true }
+            const updateDoc = {
+                $set: {
+                    quantity: updateInfo.quantity
+                }
+            }
+            const result = await ordersCollection.updateOne(filter, updateDoc, options);
+            res.send(result)
         })
         
     } finally {
