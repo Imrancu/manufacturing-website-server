@@ -8,18 +8,21 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-
-
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.0rjro.mongodb.net/?retryWrites=true&w=majority`;
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
-
 async function run() {
     try {
         await client.connect();
-        console.log('DB Connected');
-        const collection = client.db("test").collection("devices");
+        const productsCollection = client.db("refmanudb").collection("products");
+
+        app.get('/product', async(req, res)=>{
+            const query = {};
+            const cursor = productsCollection.find(query);
+            const products = await cursor.toArray();
+            res.send(products);
+        })
         
     } finally {
     }
