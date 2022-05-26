@@ -36,33 +36,33 @@ async function run() {
         const productsCollection = client.db("refmanudb").collection("products");
         const usersCollection = client.db("refmanudb").collection("users");
         const ordersCollection = client.db("refmanudb").collection("orders");
-
+        //Home Product API
         app.get('/product', async (req, res) => {
             const query = {};
             const cursor = productsCollection.find(query);
             const products = await cursor.toArray();
             res.send(products);
         });
-
+        // finding specific product by onClick 
         app.get('/product/:id', async (req, res) => {
             const id = req.params.id
             const filter = { _id: ObjectId(id) }
             const result = await productsCollection.findOne(filter)
             res.send(result)
         });
-
+        // User finding API
         app.get('/user', async (req, res) => {
             const users = await usersCollection.find().toArray()
             res.send(users)
         })
-
+        // User info showing API
         app.get('/user/:email', async (req, res) => {
             const email = req.params.email
             const filter = { email: email }
             const result = await usersCollection.findOne(filter)
             res.send(result)
         })
-
+        // User info update API
         app.put('/user/:email', async (req, res) => {
             const email = req.params.email;
             const user = req.body;
@@ -93,7 +93,7 @@ async function run() {
             )
 
         })
-
+        // Admin Feature API
         app.get('/admin/:email', async(req, res)=>{
             const email = req.params.email;
             const user = await usersCollection.findOne({email: email});
