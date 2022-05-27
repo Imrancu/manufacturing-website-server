@@ -36,6 +36,14 @@ async function run() {
         const productsCollection = client.db("refmanudb").collection("products");
         const usersCollection = client.db("refmanudb").collection("users");
         const ordersCollection = client.db("refmanudb").collection("orders");
+        const reviewsCollection = client.db("refmanudb").collection("reviews");
+
+        // add product API
+        app.post('/addProduct', async (req, res) => {
+            const product = req.body;
+            const result = await productsCollection.insertOne(product);
+            res.send(result)
+        })
         //Home Product API
         app.get('/product', async (req, res) => {
             const query = {};
@@ -50,6 +58,24 @@ async function run() {
             const result = await productsCollection.findOne(filter)
             res.send(result)
         });
+        app.delete('/product/:id', async (req, res) => {
+            const id = req.params.id
+            const filter = { _id: ObjectId(id) }
+            const result = await productsCollection.deleteOne(filter)
+            res.send(result)
+        });
+        
+
+        app.post('/review', async (req, res) => {
+            const data = req.body;
+            const result = await reviewsCollection.insertOne(data)
+            res.send(result)
+        })
+        app.get('/review', async (req, res) => {
+            const review = await reviewsCollection.find().toArray()
+            res.send(review)
+        })
+
         // User finding API
         app.get('/user', async (req, res) => {
             const users = await usersCollection.find().toArray()
@@ -101,27 +127,22 @@ async function run() {
             res.send({admin: isAdmin});
         })
 
-        // order Get API
-        app.get('/order', verifyJWT, async (req, res) => {
-            const buyer = req.query.buyer;
-            const decodedEmail = req.decoded.email;
-            if (buyer === decodedEmail) {
-                const query = { buyer: buyer };
-                const orders = await ordersCollection.find(query).toArray();
-                res.send(orders);
-            }
-            else {
-                return res.status(403).send({ message: 'Forbidden Access' })
-            }
-        });
+        app.get('/manageOrder', async(req, res)=>{
+            const result = await ordersCollection.find().toArray()
+            res.send(result)
+        })
+
+        app.get('/order/:email', async (req, res)=>{
+            const email = req.params.email;
+            const query = {client: email};
+            const result = await ordersCollection.find(query).toArray()
+            console.log(result);
+            res.send(result);
+        })
+
         // order post API
         app.post('/order', async (req, res) => {
-            const order = req.body;
-            const query = { name: order.name }
-            const exists = await ordersCollection.findOne(query);
-            if (exists) {
-                return res.send({ success: false, order: exists })
-            }
+            const order = req.body;       
             const result = await ordersCollection.insertOne(order)
             return res.send({ success: true, result })
         })
