@@ -58,12 +58,6 @@ async function run() {
             const result = await productsCollection.findOne(filter)
             res.send(result)
         });
-        app.delete('/product/:id', async (req, res) => {
-            const id = req.params.id
-            const filter = { _id: ObjectId(id) }
-            const result = await productsCollection.deleteOne(filter)
-            res.send(result)
-        });
         
         // Review Post API
         app.post('/review', async (req, res) => {
@@ -71,6 +65,7 @@ async function run() {
             const result = await reviewsCollection.insertOne(data)
             res.send(result)
         })
+        // Review Showing api added
         app.get('/review', async (req, res) => {
             const review = await reviewsCollection.find().toArray()
             res.send(review)
