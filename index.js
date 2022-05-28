@@ -58,7 +58,8 @@ async function run() {
             const result = await productsCollection.findOne(filter)
             res.send(result)
         });
-        
+
+
         // Review Post API
         app.post('/review', async (req, res) => {
             const data = req.body;
@@ -109,35 +110,42 @@ async function run() {
                 const result = await usersCollection.updateOne(filter, updateDoc);
                 res.send(result);
             }
-            else(
-                res.status(403).send({message: "forbidden"})
+            else (
+                res.status(403).send({ message: "forbidden" })
             )
 
         })
         // Admin Feature API
-        app.get('/admin/:email', async(req, res)=>{
+        app.get('/admin/:email', async (req, res) => {
             const email = req.params.email;
-            const user = await usersCollection.findOne({email: email});
+            const user = await usersCollection.findOne({ email: email });
             const isAdmin = user.role === 'admin';
-            res.send({admin: isAdmin});
+            res.send({ admin: isAdmin });
         })
 
-        app.get('/manageOrder', async(req, res)=>{
+        app.get('/manageOrder', async (req, res) => {
             const result = await ordersCollection.find().toArray()
             res.send(result)
         })
 
-        app.get('/order/:email', async (req, res)=>{
+        app.get('/order/:email', async (req, res) => {
             const email = req.params.email;
-            const query = {client: email};
+            const query = { client: email };
             const result = await ordersCollection.find(query).toArray()
             console.log(result);
             res.send(result);
         })
 
+        app.get('/payOrder:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId.id };
+            const result = await ordersCollection.findOne(query);
+            res.send(result);
+        })
+
         // order post API
         app.post('/order', async (req, res) => {
-            const order = req.body;       
+            const order = req.body;
             const result = await ordersCollection.insertOne(order)
             return res.send({ success: true, result })
         })
