@@ -5,6 +5,7 @@ require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const app = express()
 const port = process.env.PORT || 5000;
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 app.use(cors());
 app.use(express.json());
@@ -36,6 +37,7 @@ async function run() {
         const productsCollection = client.db("refmanudb").collection("products");
         const usersCollection = client.db("refmanudb").collection("users");
         const ordersCollection = client.db("refmanudb").collection("orders");
+        const paymentsCollection = client.db("refmanudb").collection("payments");
         const reviewsCollection = client.db("refmanudb").collection("reviews");
 
         // add product API
@@ -115,6 +117,17 @@ async function run() {
             )
 
         })
+        app.post('/create-payment-intent', async(req, res)=>{
+            const order = req.body;
+            const price = order.price;
+            const amount = price*100;
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: amount,
+                currency: "usd",
+                payment_method_types:['card']
+            });
+            res.send({clientSecret: paymentIntent.client_secret})
+        })
         // Admin Feature API
         app.get('/admin/:email', async (req, res) => {
             const email = req.params.email;
@@ -136,12 +149,30 @@ async function run() {
             res.send(result);
         })
 
-        app.get('/payOrder:id', async (req, res) => {
+        app.get('/payOrder/:id', async (req, res) => {
             const id = req.params.id;
-            const query = { _id: ObjectId.id };
+            const query = { _id: ObjectId(id) };
             const result = await ordersCollection.findOne(query);
             res.send(result);
-        })
+        });
+
+        app.patch('/orderPayment/:id', verifyJWT, async(req, res) =>{
+            const id  = req.params.id;
+            const payment = req.body;
+            const filter = {_id: ObjectId(id)};
+            const updatedDoc = {
+              $set: {
+                paid: true,
+                transactionId: payment.transactionId
+              }
+            }
+      
+            const result = await paymentsCollection.insertOne(payment);
+            const updatedOrder = await ordersCollection.updateOne(filter, updatedDoc);
+            res.send(updatedOrder);
+          })
+
+       
 
         // order post API
         app.post('/order', async (req, res) => {
