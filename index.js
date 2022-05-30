@@ -145,7 +145,6 @@ async function run() {
             const email = req.params.email;
             const query = { client: email };
             const result = await ordersCollection.find(query).toArray()
-            console.log(result);
             res.send(result);
         })
 
@@ -156,7 +155,7 @@ async function run() {
             res.send(result);
         });
 
-        app.patch('/orderPayment/:id', verifyJWT, async(req, res) =>{
+        app.patch('/orderPayment/:id', async(req, res) =>{
             const id  = req.params.id;
             const payment = req.body;
             const filter = {_id: ObjectId(id)};
@@ -169,7 +168,7 @@ async function run() {
       
             const result = await paymentsCollection.insertOne(payment);
             const updatedOrder = await ordersCollection.updateOne(filter, updatedDoc);
-            res.send(updatedOrder);
+            res.send(result, updatedOrder);
           })
 
        
