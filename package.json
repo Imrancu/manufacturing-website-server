@@ -1,7 +1,7 @@
 {
-  "name": "refrigerator-manufecturing-server",
+  "name": "c",
   "version": "1.0.0",
-  "description": "",
+  "description": "Live Website URL [Refrigerator Manufacturing](https://refrigerator-manufacturing.web.app/).",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -18,5 +18,14 @@
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^4.6.0",
     "stripe": "^9.5.0"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/programming-hero-web-course1/manufacturer-website-server-side-Imrancu.git"
+  },
+  "bugs": {
+    "url": "https://github.com/programming-hero-web-course1/manufacturer-website-server-side-Imrancu/issues"
+  },
+  "homepage": "https://github.com/programming-hero-web-course1/manufacturer-website-server-side-Imrancu#readme"
 }
